@@ -104,7 +104,7 @@ namespace itr_save_edit
                     level = o.Level;
                 });
 
-            if(!File.Exists(filename))
+            if (!File.Exists(filename))
             {
                 Console.WriteLine("  Error: Could not read file");
                 System.Environment.Exit(1);
@@ -163,11 +163,32 @@ namespace itr_save_edit
 
             // security level
             Console.WriteLine("  Updating security level");
+            count = 0;
             foreach (var decompressed_chunk in decompressed_chunks)
             {
                 if (ReplaceBytes(decompressed_chunk, playerlevel_string_bytes, playerlevel_value_offset, level))
                 {
-                    break;
+                    count++;
+                    if (count == 2)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        var searchOffset = GetPositionAfterMatch(decompressed_chunk, playerlevel_string_bytes);
+
+                        if (searchOffset > -1)
+                        {
+                            if (ReplaceBytes(decompressed_chunk, playerlevel_string_bytes, playerlevel_value_offset, level, searchOffset))
+                            {
+                                count++;
+                                if (count == 2)
+                                {
+                                    break;
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
